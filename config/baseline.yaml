@@ -1,0 +1,14 @@
+seed: 2027
+quaternion_order: wxyz
+sampling_hz: 100
+context_samples: 100
+horizon_samples: 20
+split:
+  unit: user
+  train: 0.8
+  validation: 0.1
+  test: 0.1
+evaluation:
+  primary_horizon: 20
+  metric: mean_geodesic_degrees
+
