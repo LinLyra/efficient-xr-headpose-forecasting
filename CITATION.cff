@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+message: "If you use this research code, please cite this repository."
+title: "Efficient Uncertainty-Aware Head-Motion Forecasting on SO(3) for XR"
+type: software
+version: 0.1.0
+date-released: 2026-11-07
+license: MIT

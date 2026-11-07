@@ -11,3 +11,19 @@ runs/
 *.pth
 *.onnx
 
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+data/
+artifacts/
+checkpoints/
+*.h5
+*.hdf5
+*.xror
+*.tar
+*.tar.gz
+*.zip
+*.npz
+pilot-manifest.json
+.env

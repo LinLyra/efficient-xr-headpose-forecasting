@@ -3,6 +3,7 @@ quaternion_order: wxyz
 sampling_hz: 100
 context_samples: 100
 horizon_samples: 20
+horizon_milliseconds_claimed: 100
 split:
   unit: user
   train: 0.8
@@ -11,4 +12,6 @@ split:
 evaluation:
   primary_horizon: 20
   metric: mean_geodesic_degrees
+  report_percentiles: [50, 90, 95, 99]
+  regimes: [stationary, steady, accelerating, decelerating, reversal]
 

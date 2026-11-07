@@ -4,6 +4,10 @@ Efficient, strictly causal prediction of future head orientation from streaming
 quaternion motion. The project studies the accuracy–latency–model-size frontier
 for deployable XR motion prediction.
 
+The current method is a 17,852-parameter causal depthwise TCN. It predicts a
+tangent-space intervention, a blend gate against the constant-pose fallback,
+and diagonal predictive uncertainty.
+
 ## Task
 
 Given up to 400 past samples at 100 Hz, predict the next 20 unit quaternions.
@@ -46,4 +50,55 @@ committed. Splits are user-disjoint and stored as hashed manifests.
 5. Report user-disjoint confidence intervals, parameters, MACs and CPU latency.
 6. Export the selected model to ONNX and test float, dynamic-quantized and
    distilled variants.
+
+The selective downloader, XROR extractor, deterministic user split and learned
+gate are implemented. Only code and aggregate results are public; BOXRR
+recordings, trajectories, user identifiers, weights and credentials are
+excluded.
+
+## Preliminary benchmark-v1 result
+
+The cloud-only benchmark contains 50 anonymous users and 49.23 hours of
+processed motion. The fixed split is 40/5/5 users. On 20,000 windows from five
+held-out users at a 200 ms horizon:
+
+| Method | Mean | p95 | User-macro mean |
+| --- | ---: | ---: | ---: |
+| Constant pose | 3.666° | 9.096° | 3.647° |
+| Residual-gated TCN | **3.185°** | **7.637°** | **3.170°** |
+
+The paired user-level improvement is -0.477° with a 95% clustered-bootstrap
+interval of [-0.676°, -0.302°]. This is preliminary: the test cohort has only
+five users and uncertainty is not calibrated (error correlation -0.002). See
+[the aggregate result](results/benchmark-v1.json) and
+[the protocol audit](docs/protocol_audit.md).
+
+## Current reproducible checks
+
+```bash
+PYTHONPATH=src pytest -q
+PYTHONPATH=src python scripts/run_synthetic_benchmark.py
+ruff check .
+```
+
+Real-data training, after independently accepting the BOXRR terms and preparing
+cloud-side processed shards:
+
+~~~bash
+python -m pip install -e '.[dev,ml]'
+python scripts/train_boxrr_gate.py /cloud/path/boxrr-benchmark-v1 \
+  --output-dir /cloud/path/experiments/gated-tcn-v1
+~~~
+
+The synthetic benchmark is not evidence of real-world accuracy. It is a
+deterministic validation of quaternion geometry, baseline behavior and the
+evaluation path before any governed dataset is accessed.
+
+## Cloud-only execution
+
+The Runpod image keeps the application under `/opt/headpose` and reserves the
+mounted `/workspace` volume for processed data and durable artifacts. See
+[`docs/runpod_handoff.md`](docs/runpod_handoff.md) for the authored deployment
+contract and the verification status. The public repository does not
+redistribute the governed dataset.
 

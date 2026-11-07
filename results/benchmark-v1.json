@@ -1,0 +1,42 @@
+{
+  "status": "preliminary_benchmark_v1_not_final_population_estimate",
+  "dataset": {
+    "users": 50,
+    "recordings": 1049,
+    "duration_hours": 49.22940534118149,
+    "raw_data_in_repository": false
+  },
+  "protocol": {
+    "sampling_hz": 100,
+    "context_samples": 50,
+    "horizon_samples": 20,
+    "physical_horizon_ms": 200,
+    "user_split": {"train": 40, "validation": 5, "test": 5},
+    "windows": {"train": 120000, "validation": 20000, "test": 20000}
+  },
+  "model": {
+    "name": "ResidualGatedTCN",
+    "parameters": 17852,
+    "onnx_exported": true,
+    "test_mean_degrees": 3.185044871378169,
+    "test_p95_degrees": 7.63741290641635,
+    "test_p99_degrees": 13.751548812021063,
+    "user_macro_mean_degrees": 3.1702013701250324
+  },
+  "constant_pose": {
+    "test_mean_degrees": 3.6659248819625425,
+    "test_p95_degrees": 9.095883007052786,
+    "user_macro_mean_degrees": 3.6470017887076254
+  },
+  "paired_user_delta_model_minus_pose_degrees": {
+    "estimate": -0.47680041858259203,
+    "lower_95": -0.6759428237971643,
+    "upper_95": -0.30186285819208153,
+    "users": 5
+  },
+  "known_limitations": {
+    "gate_mean_final": 0.01688622683286667,
+    "uncertainty_error_correlation_final": -0.0017399336025840397,
+    "test_users": 5
+  }
+}
