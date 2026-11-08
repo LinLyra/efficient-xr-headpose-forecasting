@@ -99,6 +99,12 @@ The synthetic benchmark is not evidence of real-world accuracy. It is a
 deterministic validation of quaternion geometry, baseline behavior and the
 evaluation path before any governed dataset is accessed.
 
+Uncertainty calibration uses validation users only. A single positive variance
+multiplier is fitted by Gaussian maximum likelihood, frozen, and then applied
+once to the held-out test users. Reports include Gaussian negative log
+likelihood, central-interval coverage from 50% to 95%, and mean absolute
+coverage error. This prevents test-set calibration leakage.
+
 ## Cloud-only execution
 
 The Runpod image keeps the application under `/opt/headpose` and reserves the

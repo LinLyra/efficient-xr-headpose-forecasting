@@ -52,6 +52,13 @@ risk, but the predicted variance is not calibrated in magnitude. The next
 revision will fit calibration on validation users, report proper scoring rules
 and calibration error, and confirm the result on a larger held-out cohort.
 
+The v3 evaluation code now fits one positive variance multiplier on validation
+users by Gaussian maximum likelihood. The multiplier is frozen before the test
+set is evaluated. Gaussian negative log likelihood, component-wise central
+interval coverage and mean absolute coverage error are reported alongside the
+existing risk–coverage results. A real-data v3 result is not reported until the
+frozen protocol has been executed on the cloud-side benchmark.
+
 ## Data boundary
 
 BOXRR-23 access is cloud-only and governed by the applicable Berkeley terms.
