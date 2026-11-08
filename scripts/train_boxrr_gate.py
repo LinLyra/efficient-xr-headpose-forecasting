@@ -21,6 +21,11 @@ from headpose.models import (
     uncertainty_aware_loss,
 )
 from headpose.quaternion import exp_map, geodesic_degrees
+from headpose.uncertainty import (
+    fit_variance_scale,
+    gaussian_nll,
+    interval_calibration,
+)
 
 
 def user_bootstrap(values: np.ndarray, seed: int = 2027) -> dict[str, float]:
@@ -59,10 +64,11 @@ def evaluate(
     feature_std: np.ndarray,
     device: torch.device,
     batch_size: int,
+    variance_scale: float = 1.0,
 ) -> dict[str, object]:
     model.eval()
     predictions: list[np.ndarray] = []
-    uncertainties: list[np.ndarray] = []
+    variances: list[np.ndarray] = []
     gates: list[np.ndarray] = []
     normalized = (dataset.features - feature_mean) / feature_std
     with torch.inference_mode():
@@ -70,10 +76,11 @@ def evaluate(
             features = torch.from_numpy(normalized[start : start + batch_size]).to(device)
             residual, log_variance, gate = model(features)
             predictions.append(gated_prediction(residual, gate).cpu().numpy())
-            uncertainties.append(log_variance.exp().mean(dim=-1).cpu().numpy())
+            variances.append(log_variance.exp().cpu().numpy())
             gates.append(gate.squeeze(-1).cpu().numpy())
     prediction = np.concatenate(predictions)
-    uncertainty = np.concatenate(uncertainties)
+    variance = np.concatenate(variances)
+    uncertainty = variance.mean(axis=-1)
     gate = np.concatenate(gates)
     final_errors = geodesic_degrees(
         exp_map(prediction[:, -1]), exp_map(dataset.targets[:, -1])
@@ -89,9 +96,9 @@ def evaluate(
     per_user_pose = np.asarray([
         pose_errors[dataset.user_indices == index].mean() for index in user_ids
     ])
-    squared_error = np.square(
-        prediction[:, -1] - dataset.targets[:, -1]
-    ).mean(axis=-1)
+    residual_error = prediction[:, -1] - dataset.targets[:, -1]
+    squared_error = np.square(residual_error).mean(axis=-1)
+    final_variance = variance[:, -1]
     return {
         "windows": int(len(final_errors)),
         "users": int(len(user_ids)),
@@ -120,7 +127,40 @@ def evaluate(
         "risk_coverage_mean_degrees": risk_coverage(
             uncertainty[:, -1], final_errors
         ),
+        "uncertainty_calibration": {
+            "variance_scale": variance_scale,
+            "gaussian_nll": gaussian_nll(
+                final_variance, residual_error, variance_scale=variance_scale
+            ),
+            **interval_calibration(
+                final_variance, residual_error, variance_scale=variance_scale
+            ),
+        },
     }
+
+
+def fit_validation_variance_scale(
+    model: nn.Module,
+    dataset: WindowDataset,
+    feature_mean: np.ndarray,
+    feature_std: np.ndarray,
+    device: torch.device,
+    batch_size: int,
+) -> float:
+    model.eval()
+    normalized = (dataset.features - feature_mean) / feature_std
+    predictions: list[np.ndarray] = []
+    variances: list[np.ndarray] = []
+    with torch.inference_mode():
+        for start in range(0, len(normalized), batch_size):
+            features = torch.from_numpy(normalized[start : start + batch_size]).to(device)
+            residual, log_variance, gate = model(features)
+            predictions.append(gated_prediction(residual, gate)[:, -1].cpu().numpy())
+            variances.append(log_variance.exp()[:, -1].cpu().numpy())
+    prediction = np.concatenate(predictions)
+    predicted_variance = np.concatenate(variances)
+    residual_error = prediction - dataset.targets[:, -1]
+    return fit_variance_scale(predicted_variance, residual_error)
 
 
 class OnnxForecaster(nn.Module):
@@ -232,6 +272,14 @@ def main() -> None:
             if stale_epochs >= 5:
                 break
     model.load_state_dict(best_state)
+    variance_scale = fit_validation_variance_scale(
+        model,
+        datasets["validation"],
+        feature_mean,
+        feature_std,
+        device,
+        args.batch_size,
+    )
     test_report = evaluate(
         model,
         datasets["test"],
@@ -239,6 +287,7 @@ def main() -> None:
         feature_std,
         device,
         args.batch_size,
+        variance_scale,
     )
     torch.save(
         {
@@ -248,6 +297,7 @@ def main() -> None:
             "context": args.context,
             "horizon": args.horizon,
             "max_residual_radians": max_residual_radians,
+            "variance_scale": variance_scale,
         },
         args.output_dir / "residual-gated-tcn.pt",
     )
@@ -266,6 +316,7 @@ def main() -> None:
         "device": str(device),
         "parameters": trainable_parameter_count(model),
         "max_correction_degrees": args.max_correction_degrees,
+        "variance_scale_fitted_on_validation": variance_scale,
         "elapsed_seconds": time.perf_counter() - started,
         "cohort_counts": {
             split: sum(value == split for value in assignments.values())
