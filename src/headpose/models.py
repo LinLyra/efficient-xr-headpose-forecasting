@@ -40,10 +40,14 @@ class ResidualGatedTCN(nn.Module):
         hidden_dim: int = 48,
         horizon: int = 20,
         dilations: tuple[int, ...] = (1, 2, 4, 8),
+        max_residual_radians: float | None = None,
     ) -> None:
         super().__init__()
         self.feature_dim = feature_dim
         self.horizon = horizon
+        if max_residual_radians is not None and max_residual_radians <= 0.0:
+            raise ValueError("max_residual_radians must be positive")
+        self.max_residual_radians = max_residual_radians
         self.input_projection = nn.Conv1d(feature_dim, hidden_dim, kernel_size=1)
         self.blocks = nn.Sequential(
             *[CausalDepthwiseBlock(hidden_dim, dilation) for dilation in dilations]
@@ -69,6 +73,8 @@ class ResidualGatedTCN(nn.Module):
         values = self.blocks(values)
         state = values[..., -1]
         residual = self.residual_head(state).reshape(-1, self.horizon, 3)
+        if self.max_residual_radians is not None:
+            residual = self.max_residual_radians * torch.tanh(residual)
         log_variance = self.uncertainty_head(state).reshape(-1, self.horizon, 3)
         gate = torch.sigmoid(self.gate_head(state)).reshape(-1, self.horizon, 1)
         return residual, log_variance, gate

@@ -44,10 +44,13 @@ on 20,000 windows from five held-out users. It improved the held-out mean from
 3.666 to 3.185 degrees. The user-paired bootstrap interval excludes zero, but
 five test users are insufficient for a final population claim.
 
-The next revision must constrain the residual/gate parameterization so the
-gate has a physically interpretable intervention magnitude, then calibrate
-uncertainty with coverage and risk–coverage curves. The current
-uncertainty–error correlation is effectively zero.
+Benchmark v2 bounds each candidate correction component at 25 degrees. This
+preserves the v1 accuracy gain while raising the final-step gate mean from
+0.017 to 0.103 on a defined physical scale. Uncertainty now ranks difficult
+samples (rank correlation 0.506), and selective coverage reduces empirical
+risk, but the predicted variance is not calibrated in magnitude. The next
+revision will fit calibration on validation users, report proper scoring rules
+and calibration error, and confirm the result on a larger held-out cohort.
 
 ## Data boundary
 

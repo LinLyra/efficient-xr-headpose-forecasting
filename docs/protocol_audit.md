@@ -121,3 +121,25 @@ this first parameterization, so the gate is not yet interpretable. Uncertainty
 calibration is also unsuccessful. Both are explicit next-stage problems rather
 than claimed contributions of benchmark v1.
 
+## Bounded intervention benchmark v2
+
+Benchmark v2 keeps the split, windows, optimizer and architecture fixed and
+changes one modeling assumption: each tangent-space correction component is
+bounded to 25 degrees before gating. This removes the arbitrary trade-off
+between an unbounded candidate correction and a near-zero gate.
+
+The bounded model achieved a 3.188-degree mean, 7.635-degree p95 and
+3.173-degree user-macro mean. Its paired improvement over constant pose was
+-0.474 degrees with a 95% user-cluster bootstrap interval of
+[-0.669, -0.305]. Accuracy is effectively unchanged from v1, while the mean
+final-step gate rises from 0.017 to 0.103 and now has a defined intervention
+scale.
+
+The uncertainty head does not predict calibrated error magnitude: its Pearson
+correlation with squared error remains -0.002. It does, however, rank difficult
+samples, with a final-step rank correlation of 0.506. Mean error at 80%, 50%
+and 20% least-uncertain coverage is 2.621, 2.248 and 1.831 degrees,
+respectively, versus 3.188 degrees at full coverage. This supports selective
+prediction but not probabilistic calibration. The next evaluation must use a
+larger held-out cohort and add explicit calibration metrics.
+

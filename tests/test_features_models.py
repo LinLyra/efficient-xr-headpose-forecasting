@@ -53,3 +53,16 @@ def test_uncertainty_loss_is_finite_and_differentiable() -> None:
     assert torch.isfinite(loss)
     assert residual.grad is not None
     assert gated_prediction(residual.detach(), gate.detach()).shape == target.shape
+
+
+def test_bounded_residual_cannot_exceed_physical_limit() -> None:
+    model = ResidualGatedTCN(max_residual_radians=0.25)
+    with torch.no_grad():
+        model.residual_head.bias.fill_(100.0)
+    residual, _, _ = model(torch.randn(2, 48, 8))
+    assert torch.max(torch.abs(residual)) <= 0.25
+
+
+def test_bounded_residual_rejects_nonpositive_limit() -> None:
+    with pytest.raises(ValueError, match="positive"):
+        ResidualGatedTCN(max_residual_radians=0.0)

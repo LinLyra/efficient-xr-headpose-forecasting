@@ -34,6 +34,24 @@ def user_bootstrap(values: np.ndarray, seed: int = 2027) -> dict[str, float]:
     }
 
 
+def rank_correlation(left: np.ndarray, right: np.ndarray) -> float:
+    left_rank = np.argsort(np.argsort(left))
+    right_rank = np.argsort(np.argsort(right))
+    return float(np.corrcoef(left_rank, right_rank)[0, 1])
+
+
+def risk_coverage(
+    uncertainty: np.ndarray, errors: np.ndarray
+) -> dict[str, float]:
+    order = np.argsort(uncertainty)
+    return {
+        f"{int(coverage * 100)}%": float(
+            errors[order[: max(1, int(len(order) * coverage))]].mean()
+        )
+        for coverage in (1.0, 0.8, 0.5, 0.2)
+    }
+
+
 def evaluate(
     model: nn.Module,
     dataset: WindowDataset,
@@ -96,6 +114,12 @@ def evaluate(
         "uncertainty_error_correlation_final": float(
             np.corrcoef(uncertainty[:, -1], squared_error)[0, 1]
         ),
+        "uncertainty_error_rank_correlation_final": rank_correlation(
+            uncertainty[:, -1], final_errors
+        ),
+        "risk_coverage_mean_degrees": risk_coverage(
+            uncertainty[:, -1], final_errors
+        ),
     }
 
 
@@ -122,6 +146,7 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--learning-rate", type=float, default=2e-3)
+    parser.add_argument("--max-correction-degrees", type=float)
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(2027)
@@ -155,7 +180,14 @@ def main() -> None:
         num_workers=2,
         pin_memory=device.type == "cuda",
     )
-    model = ResidualGatedTCN(horizon=args.horizon).to(device)
+    max_residual_radians = (
+        None
+        if args.max_correction_degrees is None
+        else float(np.radians(args.max_correction_degrees))
+    )
+    model = ResidualGatedTCN(
+        horizon=args.horizon, max_residual_radians=max_residual_radians
+    ).to(device)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=args.learning_rate, weight_decay=1e-4
     )
@@ -215,6 +247,7 @@ def main() -> None:
             "feature_std": feature_std,
             "context": args.context,
             "horizon": args.horizon,
+            "max_residual_radians": max_residual_radians,
         },
         args.output_dir / "residual-gated-tcn.pt",
     )
@@ -229,9 +262,10 @@ def main() -> None:
         opset_version=17,
     )
     report = {
-        "status": "benchmark_v1_not_final_population_estimate",
+        "status": "preliminary_benchmark_not_final_population_estimate",
         "device": str(device),
         "parameters": trainable_parameter_count(model),
+        "max_correction_degrees": args.max_correction_degrees,
         "elapsed_seconds": time.perf_counter() - started,
         "cohort_counts": {
             split: sum(value == split for value in assignments.values())
