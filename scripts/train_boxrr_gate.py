@@ -15,6 +15,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from headpose.dataset import WindowDataset, materialize_boxrr_splits
 from headpose.models import (
+    ResidualGatedGRU,
+    ResidualGatedMLP,
     ResidualGatedTCN,
     gated_prediction,
     trainable_parameter_count,
@@ -54,6 +56,32 @@ def risk_coverage(
             errors[order[: max(1, int(len(order) * coverage))]].mean()
         )
         for coverage in (1.0, 0.8, 0.5, 0.2)
+    }
+
+
+def regime_metrics(
+    recent_rotation_degrees: np.ndarray,
+    model_errors: np.ndarray,
+    pose_errors: np.ndarray,
+) -> dict[str, object]:
+    masks = {
+        "low": recent_rotation_degrees < 1.0,
+        "medium": (recent_rotation_degrees >= 1.0)
+        & (recent_rotation_degrees < 5.0),
+        "high": recent_rotation_degrees >= 5.0,
+    }
+    return {
+        name: {
+            "windows": int(mask.sum()),
+            "model_mean": float(model_errors[mask].mean()),
+            "constant_pose_mean": float(pose_errors[mask].mean()),
+            "delta_model_minus_pose": float(
+                (model_errors[mask] - pose_errors[mask]).mean()
+            ),
+            "model_p95": float(np.quantile(model_errors[mask], 0.95)),
+        }
+        for name, mask in masks.items()
+        if mask.any()
     }
 
 
@@ -99,6 +127,11 @@ def evaluate(
     residual_error = prediction[:, -1] - dataset.targets[:, -1]
     squared_error = np.square(residual_error).mean(axis=-1)
     final_variance = variance[:, -1]
+    recent_rotation_degrees = np.degrees(
+        dataset.features[:, -10:, 6].sum(axis=1)
+    )
+    omega_risk = dataset.features[:, -1, 6]
+    alpha_risk = dataset.features[:, -1, 7]
     return {
         "windows": int(len(final_errors)),
         "users": int(len(user_ids)),
@@ -126,6 +159,23 @@ def evaluate(
         ),
         "risk_coverage_mean_degrees": risk_coverage(
             uncertainty[:, -1], final_errors
+        ),
+        "risk_baselines": {
+            "absolute_omega": {
+                "rank_correlation": rank_correlation(omega_risk, final_errors),
+                "risk_coverage_mean_degrees": risk_coverage(
+                    omega_risk, final_errors
+                ),
+            },
+            "absolute_alpha": {
+                "rank_correlation": rank_correlation(alpha_risk, final_errors),
+                "risk_coverage_mean_degrees": risk_coverage(
+                    alpha_risk, final_errors
+                ),
+            },
+        },
+        "motion_regimes_by_recent_100ms_rotation": regime_metrics(
+            recent_rotation_degrees, final_errors, pose_errors
         ),
         "uncertainty_calibration": {
             "variance_scale": variance_scale,
@@ -187,6 +237,7 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--learning-rate", type=float, default=2e-3)
     parser.add_argument("--max-correction-degrees", type=float)
+    parser.add_argument("--model", choices=("tcn", "mlp", "gru"), default="tcn")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(2027)
@@ -225,9 +276,20 @@ def main() -> None:
         if args.max_correction_degrees is None
         else float(np.radians(args.max_correction_degrees))
     )
-    model = ResidualGatedTCN(
-        horizon=args.horizon, max_residual_radians=max_residual_radians
-    ).to(device)
+    model_types = {
+        "tcn": lambda: ResidualGatedTCN(
+            horizon=args.horizon, max_residual_radians=max_residual_radians
+        ),
+        "mlp": lambda: ResidualGatedMLP(
+            context_steps=args.context - 2,
+            horizon=args.horizon,
+            max_residual_radians=max_residual_radians,
+        ),
+        "gru": lambda: ResidualGatedGRU(
+            horizon=args.horizon, max_residual_radians=max_residual_radians
+        ),
+    }
+    model = model_types[args.model]().to(device)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=args.learning_rate, weight_decay=1e-4
     )
@@ -299,13 +361,13 @@ def main() -> None:
             "max_residual_radians": max_residual_radians,
             "variance_scale": variance_scale,
         },
-        args.output_dir / "residual-gated-tcn.pt",
+        args.output_dir / f"residual-gated-{args.model}.pt",
     )
     model_cpu = model.cpu().eval()
     torch.onnx.export(
         OnnxForecaster(model_cpu),
         torch.zeros(1, args.context - 2, 8),
-        args.output_dir / "residual-gated-tcn.onnx",
+        args.output_dir / f"residual-gated-{args.model}.onnx",
         input_names=["motion_features"],
         output_names=["tangent_prediction", "log_variance"],
         dynamic_axes={"motion_features": {0: "batch"}},
@@ -315,6 +377,7 @@ def main() -> None:
         "status": "preliminary_benchmark_not_final_population_estimate",
         "device": str(device),
         "parameters": trainable_parameter_count(model),
+        "model": args.model,
         "max_correction_degrees": args.max_correction_degrees,
         "variance_scale_fitted_on_validation": variance_scale,
         "elapsed_seconds": time.perf_counter() - started,

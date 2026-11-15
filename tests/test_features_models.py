@@ -6,6 +6,8 @@ from headpose.synthetic import make_trajectory
 torch = pytest.importorskip("torch")
 
 from headpose.models import (  # noqa: E402
+    ResidualGatedGRU,
+    ResidualGatedMLP,
     ResidualGatedTCN,
     gated_prediction,
     trainable_parameter_count,
@@ -66,3 +68,18 @@ def test_bounded_residual_cannot_exceed_physical_limit() -> None:
 def test_bounded_residual_rejects_nonpositive_limit() -> None:
     with pytest.raises(ValueError, match="positive"):
         ResidualGatedTCN(max_residual_radians=0.0)
+
+
+@pytest.mark.parametrize(
+    ("model", "inputs"),
+    [
+        (ResidualGatedMLP(context_steps=48), torch.randn(2, 48, 8)),
+        (ResidualGatedGRU(), torch.randn(2, 48, 8)),
+    ],
+)
+def test_control_models_share_forecast_interface(model, inputs) -> None:
+    residual, log_variance, gate = model(inputs)
+    assert residual.shape == (2, 20, 3)
+    assert log_variance.shape == residual.shape
+    assert gate.shape == (2, 20, 1)
+    assert trainable_parameter_count(model) < 100_000

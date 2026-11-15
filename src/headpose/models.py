@@ -80,6 +80,90 @@ class ResidualGatedTCN(nn.Module):
         return residual, log_variance, gate
 
 
+class _ResidualGatedHeads(nn.Module):
+    def __init__(
+        self,
+        state_dim: int,
+        horizon: int,
+        max_residual_radians: float | None,
+    ) -> None:
+        super().__init__()
+        if max_residual_radians is not None and max_residual_radians <= 0.0:
+            raise ValueError("max_residual_radians must be positive")
+        self.horizon = horizon
+        self.max_residual_radians = max_residual_radians
+        self.residual_head = nn.Linear(state_dim, horizon * 3)
+        self.uncertainty_head = nn.Linear(state_dim, horizon * 3)
+        self.gate_head = nn.Linear(state_dim, horizon)
+        nn.init.zeros_(self.residual_head.weight)
+        nn.init.zeros_(self.residual_head.bias)
+        nn.init.zeros_(self.gate_head.weight)
+        nn.init.constant_(self.gate_head.bias, -2.0)
+
+    def project(
+        self, state: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        residual = self.residual_head(state).reshape(-1, self.horizon, 3)
+        if self.max_residual_radians is not None:
+            residual = self.max_residual_radians * torch.tanh(residual)
+        log_variance = self.uncertainty_head(state).reshape(-1, self.horizon, 3)
+        gate = torch.sigmoid(self.gate_head(state)).reshape(-1, self.horizon, 1)
+        return residual, log_variance, gate
+
+
+class ResidualGatedMLP(_ResidualGatedHeads):
+    """Short-context feed-forward control for the temporal encoder ablation."""
+
+    def __init__(
+        self,
+        context_steps: int,
+        feature_dim: int = 8,
+        hidden_dim: int = 64,
+        horizon: int = 20,
+        max_residual_radians: float | None = None,
+    ) -> None:
+        super().__init__(hidden_dim, horizon, max_residual_radians)
+        self.context_steps = context_steps
+        self.feature_dim = feature_dim
+        self.encoder = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(context_steps * feature_dim, hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.GELU(),
+        )
+
+    def forward(
+        self, features: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if features.shape[1:] != (self.context_steps, self.feature_dim):
+            raise ValueError("features do not match configured context and feature size")
+        return self.project(self.encoder(features))
+
+
+class ResidualGatedGRU(_ResidualGatedHeads):
+    """Compact recurrent control for the temporal encoder ablation."""
+
+    def __init__(
+        self,
+        feature_dim: int = 8,
+        hidden_dim: int = 48,
+        horizon: int = 20,
+        max_residual_radians: float | None = None,
+    ) -> None:
+        super().__init__(hidden_dim, horizon, max_residual_radians)
+        self.feature_dim = feature_dim
+        self.encoder = nn.GRU(feature_dim, hidden_dim, batch_first=True)
+
+    def forward(
+        self, features: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if features.ndim != 3 or features.shape[-1] != self.feature_dim:
+            raise ValueError("features must have shape [batch, time, feature_dim]")
+        _, state = self.encoder(features)
+        return self.project(state[-1])
+
+
 def trainable_parameter_count(model: nn.Module) -> int:
     return sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad)
 
