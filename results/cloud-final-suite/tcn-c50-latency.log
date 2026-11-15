@@ -1,0 +1,15 @@
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+{
+  "float32": {
+    "bytes": 84512,
+    "p50_ms": 0.111874,
+    "p95_ms": 0.17250994999999997,
+    "p99_ms": 0.20817138999999998
+  },
+  "dynamic_int8": {
+    "bytes": 57082,
+    "p50_ms": 0.32597,
+    "p95_ms": 0.335003,
+    "p99_ms": 0.33917201
+  }
+}

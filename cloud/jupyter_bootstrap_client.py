@@ -132,7 +132,7 @@ def main() -> None:
         [
             "rm -rf /workspace/xr-headpose-forecasting",
             "mkdir -p /workspace/xr-headpose-forecasting",
-            "tar -xzf /workspace/headpose-project.tar.gz -C /workspace/xr-headpose-forecasting",
+            "tar --no-same-owner -xzf /workspace/headpose-project.tar.gz -C /workspace/xr-headpose-forecasting",
             "cd /workspace/xr-headpose-forecasting",
             "python -m pip install -q -e '.[dev]'",
             "python cloud/prepare_workspace.py",

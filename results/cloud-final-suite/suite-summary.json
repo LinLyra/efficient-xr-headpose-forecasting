@@ -1,0 +1,616 @@
+{
+  "gru-c50": {
+    "elapsed_seconds": 456.2781993141398,
+    "parameters": 15212,
+    "test": {
+      "windows": 20000,
+      "users": 5,
+      "model": {
+        "mean": 3.162212820220885,
+        "median": 2.492465965372409,
+        "p95": 7.554881898455172,
+        "p99": 13.871341826679732,
+        "user_macro_95": {
+          "estimate": 3.1483789721213524,
+          "lower": 2.551220213495655,
+          "upper": 3.948786932567772,
+          "users": 5
+        }
+      },
+      "constant_pose": {
+        "mean": 3.6659248819625425,
+        "p95": 9.095883007052786,
+        "user_macro_95": {
+          "estimate": 3.6470017887076254,
+          "lower": 2.871514435724497,
+          "upper": 4.640856410073465,
+          "users": 5
+        }
+      },
+      "paired_delta_model_minus_pose_95": {
+        "estimate": -0.4986228165862725,
+        "lower": -0.6926807067099752,
+        "upper": -0.3196829930245587,
+        "users": 5
+      },
+      "gate_mean_final": 0.19500651955604553,
+      "uncertainty_error_correlation_final": 0.4038945376402865,
+      "uncertainty_error_rank_correlation_final": 0.5207850798554626,
+      "risk_coverage_mean_degrees": {
+        "100%": 3.162212820220885,
+        "80%": 2.5966417588795676,
+        "50%": 2.202162038779536,
+        "20%": 1.7868941000474534
+      },
+      "risk_baselines": {
+        "absolute_omega": {
+          "rank_correlation": 0.41515314398538283,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.162212820220885,
+            "80%": 2.7079651385516845,
+            "50%": 2.3679127850692128,
+            "20%": 2.041007965810431
+          }
+        },
+        "absolute_alpha": {
+          "rank_correlation": 0.284176402524941,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.1622128202208843,
+            "80%": 2.9229949728040516,
+            "50%": 2.6537427186989304,
+            "20%": 2.3216331407111257
+          }
+        }
+      },
+      "motion_regimes_by_recent_100ms_rotation": {
+        "low": {
+          "windows": 1322,
+          "model_mean": 1.6875018423770884,
+          "constant_pose_mean": 1.8367595161777759,
+          "delta_model_minus_pose": -0.14925767380068788,
+          "model_p95": 3.747682373691166
+        },
+        "medium": {
+          "windows": 16006,
+          "model_mean": 2.876319265705287,
+          "constant_pose_mean": 3.287266397921904,
+          "delta_model_minus_pose": -0.4109471322166167,
+          "model_p95": 6.472336201606937
+        },
+        "high": {
+          "windows": 2672,
+          "model_mean": 5.604420958801031,
+          "constant_pose_mean": 6.839189967711763,
+          "delta_model_minus_pose": -1.2347690089107324,
+          "model_p95": 14.610719813936836
+        }
+      },
+      "uncertainty_calibration": {
+        "variance_scale": 0.9307219810298878,
+        "gaussian_nll": -1.9693680958501918,
+        "component_coverage": {
+          "50%": 0.5543666666666667,
+          "68%": 0.7243166666666667,
+          "80%": 0.8273166666666667,
+          "90%": 0.90405,
+          "95%": 0.9423666666666667
+        },
+        "mean_absolute_coverage_error": 0.027536666666666654
+      }
+    }
+  },
+  "mlp-c50": {
+    "elapsed_seconds": 435.4410983482376,
+    "parameters": 37900,
+    "test": {
+      "windows": 20000,
+      "users": 5,
+      "model": {
+        "mean": 3.1979548990044973,
+        "median": 2.523806695789931,
+        "p95": 7.678868002339833,
+        "p99": 13.90151868904951,
+        "user_macro_95": {
+          "estimate": 3.1827779156687606,
+          "lower": 2.5711605452561015,
+          "upper": 3.9977774197234774,
+          "users": 5
+        }
+      },
+      "constant_pose": {
+        "mean": 3.6659248819625425,
+        "p95": 9.095883007052786,
+        "user_macro_95": {
+          "estimate": 3.6470017887076254,
+          "lower": 2.871514435724497,
+          "upper": 4.640856410073465,
+          "users": 5
+        }
+      },
+      "paired_delta_model_minus_pose_95": {
+        "estimate": -0.4642238730388642,
+        "lower": -0.6487041827118483,
+        "upper": -0.2947286981065339,
+        "users": 5
+      },
+      "gate_mean_final": 0.11335404962301254,
+      "uncertainty_error_correlation_final": 0.08029470920431611,
+      "uncertainty_error_rank_correlation_final": 0.48872442373281094,
+      "risk_coverage_mean_degrees": {
+        "100%": 3.1979548990044977,
+        "80%": 2.6443479547771487,
+        "50%": 2.2946364616343553,
+        "20%": 1.9097036866979558
+      },
+      "risk_baselines": {
+        "absolute_omega": {
+          "rank_correlation": 0.42135442349888597,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.1979548990044977,
+            "80%": 2.734584596739967,
+            "50%": 2.3838320154309955,
+            "20%": 2.0535055726026163
+          }
+        },
+        "absolute_alpha": {
+          "rank_correlation": 0.28162551680306375,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.1979548990044973,
+            "80%": 2.959294178080609,
+            "50%": 2.6933843575061607,
+            "20%": 2.3804902720028434
+          }
+        }
+      },
+      "motion_regimes_by_recent_100ms_rotation": {
+        "low": {
+          "windows": 1322,
+          "model_mean": 1.6934877535613855,
+          "constant_pose_mean": 1.8367595161777759,
+          "delta_model_minus_pose": -0.1432717626163908,
+          "model_p95": 3.7995605043237854
+        },
+        "medium": {
+          "windows": 16006,
+          "model_mean": 2.910578925124659,
+          "constant_pose_mean": 3.287266397921904,
+          "delta_model_minus_pose": -0.37668747279724496,
+          "model_p95": 6.580262646756653
+        },
+        "high": {
+          "windows": 2672,
+          "model_mean": 5.663765304766653,
+          "constant_pose_mean": 6.839189967711763,
+          "delta_model_minus_pose": -1.175424662945109,
+          "model_p95": 14.64315671861016
+        }
+      },
+      "uncertainty_calibration": {
+        "variance_scale": 1.1321557542446283,
+        "gaussian_nll": -1.9307887584860328,
+        "component_coverage": {
+          "50%": 0.5751,
+          "68%": 0.7444833333333334,
+          "80%": 0.83885,
+          "90%": 0.9115666666666666,
+          "95%": 0.9443333333333334
+        },
+        "mean_absolute_coverage_error": 0.039133333333333284
+      }
+    }
+  },
+  "tcn-c10": {
+    "elapsed_seconds": 385.3142422484234,
+    "parameters": 17852,
+    "test": {
+      "windows": 20000,
+      "users": 5,
+      "model": {
+        "mean": 3.224084675980071,
+        "median": 2.565675356034461,
+        "p95": 7.69455092555159,
+        "p99": 13.876636553628865,
+        "user_macro_95": {
+          "estimate": 3.2068328498001764,
+          "lower": 2.593273566648754,
+          "upper": 3.9813353101158206,
+          "users": 5
+        }
+      },
+      "constant_pose": {
+        "mean": 3.647436605236161,
+        "p95": 9.011839132857427,
+        "user_macro_95": {
+          "estimate": 3.6275710746141834,
+          "lower": 2.868523077243139,
+          "upper": 4.570120276154031,
+          "users": 5
+        }
+      },
+      "paired_delta_model_minus_pose_95": {
+        "estimate": -0.42073822481400736,
+        "lower": -0.6013594672608653,
+        "upper": -0.2626750093717307,
+        "users": 5
+      },
+      "gate_mean_final": 0.10362205654382706,
+      "uncertainty_error_correlation_final": 0.20389804931023842,
+      "uncertainty_error_rank_correlation_final": 0.46628228861870563,
+      "risk_coverage_mean_degrees": {
+        "100%": 3.224084675980071,
+        "80%": 2.7039607488049917,
+        "50%": 2.3614974356836878,
+        "20%": 1.9564379669900123
+      },
+      "risk_baselines": {
+        "absolute_omega": {
+          "rank_correlation": 0.413734419225836,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.224084675980071,
+            "80%": 2.7621899935122016,
+            "50%": 2.4288366746484784,
+            "20%": 2.1109705535356205
+          }
+        },
+        "absolute_alpha": {
+          "rank_correlation": 0.27770947821727365,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.224084675980071,
+            "80%": 2.9717282632996396,
+            "50%": 2.6823777396026047,
+            "20%": 2.4007484769557887
+          }
+        }
+      },
+      "motion_regimes_by_recent_100ms_rotation": {
+        "low": {
+          "windows": 2521,
+          "model_mean": 1.8904959175859497,
+          "constant_pose_mean": 2.033894605726553,
+          "delta_model_minus_pose": -0.14339868814060297,
+          "model_p95": 4.112248778710313
+        },
+        "medium": {
+          "windows": 16051,
+          "model_mean": 3.14510065034563,
+          "constant_pose_mean": 3.505543305330013,
+          "delta_model_minus_pose": -0.3604426549843828,
+          "model_p95": 7.08300496895135
+        },
+        "high": {
+          "windows": 1428,
+          "model_mean": 6.46620642343805,
+          "constant_pose_mean": 8.090902107727278,
+          "delta_model_minus_pose": -1.6246956842892277,
+          "model_p95": 16.66966210102968
+        }
+      },
+      "uncertainty_calibration": {
+        "variance_scale": 0.9521985207125734,
+        "gaussian_nll": -1.9091460779238658,
+        "component_coverage": {
+          "50%": 0.5676166666666667,
+          "68%": 0.7352333333333333,
+          "80%": 0.83125,
+          "90%": 0.9031833333333333,
+          "95%": 0.9392833333333334
+        },
+        "mean_absolute_coverage_error": 0.03359999999999996
+      }
+    }
+  },
+  "tcn-c100": {
+    "elapsed_seconds": 551.2306733485311,
+    "parameters": 17852,
+    "test": {
+      "windows": 20000,
+      "users": 5,
+      "model": {
+        "mean": 3.182607757184464,
+        "median": 2.5315476247276787,
+        "p95": 7.668789511995807,
+        "p99": 13.254215719916555,
+        "user_macro_95": {
+          "estimate": 3.16720613216223,
+          "lower": 2.6103637667285646,
+          "upper": 3.8714254229737515,
+          "users": 5
+        }
+      },
+      "constant_pose": {
+        "mean": 3.676805837267062,
+        "p95": 9.270117433975868,
+        "user_macro_95": {
+          "estimate": 3.6583006337832358,
+          "lower": 2.9440876308609294,
+          "upper": 4.543070757137849,
+          "users": 5
+        }
+      },
+      "paired_delta_model_minus_pose_95": {
+        "estimate": -0.4910945016210066,
+        "lower": -0.6813316825735937,
+        "upper": -0.32403751572286826,
+        "users": 5
+      },
+      "gate_mean_final": 0.10721202194690704,
+      "uncertainty_error_correlation_final": 0.35471969212390475,
+      "uncertainty_error_rank_correlation_final": 0.5021149498047872,
+      "risk_coverage_mean_degrees": {
+        "100%": 3.1826077571844644,
+        "80%": 2.658487132100188,
+        "50%": 2.269247272606074,
+        "20%": 1.830711519208364
+      },
+      "risk_baselines": {
+        "absolute_omega": {
+          "rank_correlation": 0.41244601670761494,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.182607757184464,
+            "80%": 2.752186933156322,
+            "50%": 2.4122547360669655,
+            "20%": 2.0659857704482536
+          }
+        },
+        "absolute_alpha": {
+          "rank_correlation": 0.28140620475151545,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.182607757184464,
+            "80%": 2.9468693049702814,
+            "50%": 2.684212640948672,
+            "20%": 2.3325219596109052
+          }
+        }
+      },
+      "motion_regimes_by_recent_100ms_rotation": {
+        "low": {
+          "windows": 1294,
+          "model_mean": 1.6337892527646318,
+          "constant_pose_mean": 1.749582134313643,
+          "delta_model_minus_pose": -0.1157928815490114,
+          "model_p95": 3.7716477019182406
+        },
+        "medium": {
+          "windows": 16045,
+          "model_mean": 2.937037732473743,
+          "constant_pose_mean": 3.31968404655899,
+          "delta_model_minus_pose": -0.3826463140852467,
+          "model_p95": 6.671639213733917
+        },
+        "high": {
+          "windows": 2661,
+          "model_mean": 5.416483063912303,
+          "constant_pose_mean": 6.7673156469373845,
+          "delta_model_minus_pose": -1.3508325830250816,
+          "model_p95": 13.64065288079908
+        }
+      },
+      "uncertainty_calibration": {
+        "variance_scale": 1.0327746483159816,
+        "gaussian_nll": -1.9527536441961943,
+        "component_coverage": {
+          "50%": 0.5560666666666667,
+          "68%": 0.7258166666666667,
+          "80%": 0.8243,
+          "90%": 0.9006666666666666,
+          "95%": 0.9399
+        },
+        "mean_absolute_coverage_error": 0.02738999999999998
+      }
+    }
+  },
+  "tcn-c25": {
+    "elapsed_seconds": 432.8271047817543,
+    "parameters": 17852,
+    "test": {
+      "windows": 20000,
+      "users": 5,
+      "model": {
+        "mean": 3.2404113468299562,
+        "median": 2.544147734864124,
+        "p95": 7.896378416375389,
+        "p99": 14.099819532852145,
+        "user_macro_95": {
+          "estimate": 3.225095706207218,
+          "lower": 2.6039458335515127,
+          "upper": 4.03395208703684,
+          "users": 5
+        }
+      },
+      "constant_pose": {
+        "mean": 3.6947054777130566,
+        "p95": 9.184592566147298,
+        "user_macro_95": {
+          "estimate": 3.6759171967168336,
+          "lower": 2.9030854331282456,
+          "upper": 4.641187916601931,
+          "users": 5
+        }
+      },
+      "paired_delta_model_minus_pose_95": {
+        "estimate": -0.4508214905096152,
+        "lower": -0.6097283955808619,
+        "upper": -0.29664703356096095,
+        "users": 5
+      },
+      "gate_mean_final": 0.1142515018582344,
+      "uncertainty_error_correlation_final": 0.438433849000927,
+      "uncertainty_error_rank_correlation_final": 0.49398629084296564,
+      "risk_coverage_mean_degrees": {
+        "100%": 3.2404113468299562,
+        "80%": 2.6758250486974084,
+        "50%": 2.306164483886257,
+        "20%": 1.8924822121970921
+      },
+      "risk_baselines": {
+        "absolute_omega": {
+          "rank_correlation": 0.4220299732265749,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.2404113468299562,
+            "80%": 2.7645528015637293,
+            "50%": 2.3988675090766884,
+            "20%": 2.075755627173585
+          }
+        },
+        "absolute_alpha": {
+          "rank_correlation": 0.2810940584542351,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.2404113468299562,
+            "80%": 2.9921776161341302,
+            "50%": 2.6970852255117164,
+            "20%": 2.3867837692379337
+          }
+        }
+      },
+      "motion_regimes_by_recent_100ms_rotation": {
+        "low": {
+          "windows": 1301,
+          "model_mean": 1.6519991195300476,
+          "constant_pose_mean": 1.7894128320303642,
+          "delta_model_minus_pose": -0.13741371250031606,
+          "model_p95": 3.741245880635488
+        },
+        "medium": {
+          "windows": 16026,
+          "model_mean": 2.9423878382425417,
+          "constant_pose_mean": 3.2991484620550597,
+          "delta_model_minus_pose": -0.35676062381251833,
+          "model_p95": 6.690689109171658
+        },
+        "high": {
+          "windows": 2673,
+          "model_mean": 5.800324948153969,
+          "constant_pose_mean": 6.993613994349133,
+          "delta_model_minus_pose": -1.1932890461951646,
+          "model_p95": 14.535974653113309
+        }
+      },
+      "uncertainty_calibration": {
+        "variance_scale": 0.9859322362456527,
+        "gaussian_nll": -1.919223061491952,
+        "component_coverage": {
+          "50%": 0.5589166666666666,
+          "68%": 0.7291166666666666,
+          "80%": 0.8283,
+          "90%": 0.90285,
+          "95%": 0.9398333333333333
+        },
+        "mean_absolute_coverage_error": 0.029869999999999973
+      }
+    }
+  },
+  "tcn-c50": {
+    "elapsed_seconds": 475.589039536193,
+    "parameters": 17852,
+    "test": {
+      "windows": 20000,
+      "users": 5,
+      "model": {
+        "mean": 3.1882374585930235,
+        "median": 2.5166686726825858,
+        "p95": 7.655908975318203,
+        "p99": 14.02209954695611,
+        "user_macro_95": {
+          "estimate": 3.173386700386488,
+          "lower": 2.568923592776731,
+          "upper": 3.970327929119361,
+          "users": 5
+        }
+      },
+      "constant_pose": {
+        "mean": 3.6659248819625425,
+        "p95": 9.095883007052786,
+        "user_macro_95": {
+          "estimate": 3.6470017887076254,
+          "lower": 2.871514435724497,
+          "upper": 4.640856410073465,
+          "users": 5
+        }
+      },
+      "paired_delta_model_minus_pose_95": {
+        "estimate": -0.47361508832113686,
+        "lower": -0.6705284809541039,
+        "upper": -0.3025908429477657,
+        "users": 5
+      },
+      "gate_mean_final": 0.10569615662097931,
+      "uncertainty_error_correlation_final": -0.0005279968488576185,
+      "uncertainty_error_rank_correlation_final": 0.508028829218572,
+      "risk_coverage_mean_degrees": {
+        "100%": 3.188237458593023,
+        "80%": 2.6238657706530084,
+        "50%": 2.243760962944387,
+        "20%": 1.8251098761956346
+      },
+      "risk_baselines": {
+        "absolute_omega": {
+          "rank_correlation": 0.41468854991572135,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.188237458593023,
+            "80%": 2.731312025013792,
+            "50%": 2.3851275063377178,
+            "20%": 2.0524102507789395
+          }
+        },
+        "absolute_alpha": {
+          "rank_correlation": 0.2798170751585426,
+          "risk_coverage_mean_degrees": {
+            "100%": 3.188237458593023,
+            "80%": 2.9500276566463706,
+            "50%": 2.678386301299416,
+            "20%": 2.3503644257958753
+          }
+        }
+      },
+      "motion_regimes_by_recent_100ms_rotation": {
+        "low": {
+          "windows": 1322,
+          "model_mean": 1.6941508333630535,
+          "constant_pose_mean": 1.8367595161777759,
+          "delta_model_minus_pose": -0.14260868281472258,
+          "model_p95": 3.7996725894188423
+        },
+        "medium": {
+          "windows": 16006,
+          "model_mean": 2.908279712867019,
+          "constant_pose_mean": 3.287266397921904,
+          "delta_model_minus_pose": -0.378986685054885,
+          "model_p95": 6.585840663992596
+        },
+        "high": {
+          "windows": 2672,
+          "model_mean": 5.604474807636601,
+          "constant_pose_mean": 6.839189967711763,
+          "delta_model_minus_pose": -1.2347151600751614,
+          "model_p95": 14.48947457758571
+        }
+      },
+      "uncertainty_calibration": {
+        "variance_scale": 0.992985754101593,
+        "gaussian_nll": -1.941550355978251,
+        "component_coverage": {
+          "50%": 0.5584166666666667,
+          "68%": 0.7277833333333333,
+          "80%": 0.8272666666666667,
+          "90%": 0.9019333333333334,
+          "95%": 0.9387166666666666
+        },
+        "mean_absolute_coverage_error": 0.029336666666666657
+      }
+    }
+  },
+  "onnx_latency": {
+    "float32": {
+      "bytes": 84512,
+      "p50_ms": 0.111874,
+      "p95_ms": 0.17250994999999997,
+      "p99_ms": 0.20817138999999998
+    },
+    "dynamic_int8": {
+      "bytes": 57082,
+      "p50_ms": 0.32597,
+      "p95_ms": 0.335003,
+      "p99_ms": 0.33917201
+    }
+  }
+}

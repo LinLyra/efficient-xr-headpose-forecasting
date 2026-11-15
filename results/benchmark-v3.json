@@ -1,0 +1,72 @@
+{
+  "status": "preliminary_benchmark_v3_not_final_population_estimate",
+  "protocol": {
+    "users": {"train": 40, "validation": 5, "test": 5},
+    "windows": {"train": 120000, "validation": 20000, "test": 20000},
+    "sampling_hz": 100,
+    "horizon_samples": 20,
+    "physical_horizon_ms": 200,
+    "max_correction_degrees": 25
+  },
+  "model_comparison_context_50": {
+    "constant_pose": {"mean_degrees": 3.665925, "p95_degrees": 9.095883},
+    "mlp": {
+      "parameters": 37900,
+      "mean_degrees": 3.197955,
+      "median_degrees": 2.523807,
+      "p95_degrees": 7.678868,
+      "paired_user_delta_degrees": -0.464224,
+      "paired_user_delta_95": [-0.648704, -0.294729]
+    },
+    "tcn": {
+      "parameters": 17852,
+      "mean_degrees": 3.188237,
+      "median_degrees": 2.516669,
+      "p95_degrees": 7.655909,
+      "paired_user_delta_degrees": -0.473615,
+      "paired_user_delta_95": [-0.670528, -0.302591]
+    },
+    "gru": {
+      "parameters": 15212,
+      "mean_degrees": 3.162213,
+      "median_degrees": 2.492466,
+      "p95_degrees": 7.554882,
+      "paired_user_delta_degrees": -0.498623,
+      "paired_user_delta_95": [-0.692681, -0.319683]
+    }
+  },
+  "tcn_context_ablation": {
+    "10": {"mean_degrees": 3.224085, "p95_degrees": 7.694551},
+    "25": {"mean_degrees": 3.240411, "p95_degrees": 7.896378},
+    "50": {"mean_degrees": 3.188237, "p95_degrees": 7.655909},
+    "100": {"mean_degrees": 3.182608, "p95_degrees": 7.668790}
+  },
+  "gru_context_50_analysis": {
+    "gate_mean_final": 0.195007,
+    "motion_regimes_delta_model_minus_pose_degrees": {
+      "low": -0.149258,
+      "medium": -0.410947,
+      "high": -1.234769
+    },
+    "uncertainty_rank_correlation": 0.520785,
+    "omega_rank_correlation": 0.415153,
+    "alpha_rank_correlation": 0.284176,
+    "risk_coverage_mean_degrees": {
+      "100%": 3.162213,
+      "80%": 2.596642,
+      "50%": 2.202162,
+      "20%": 1.786894
+    },
+    "mean_absolute_coverage_error": 0.027537
+  },
+  "deployment_tcn_context_50": {
+    "float32": {"bytes": 84512, "p50_ms": 0.111874, "p99_ms": 0.208171},
+    "dynamic_int8": {"bytes": 57082, "p50_ms": 0.325970, "p99_ms": 0.339172}
+  },
+  "limitations": [
+    "The held-out cohort contains only five users.",
+    "Context-length runs share users but not identical sampled windows.",
+    "Latency was measured on the cloud Pod CPU and is not a mobile-device result.",
+    "Dynamic INT8 reduces model size but is slower than FP32 for this tiny network."
+  ]
+}

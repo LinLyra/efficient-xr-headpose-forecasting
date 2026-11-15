@@ -56,26 +56,28 @@ gate are implemented. Only code and aggregate results are public; BOXRR
 recordings, trajectories, user identifiers, weights and credentials are
 excluded.
 
-## Preliminary benchmark-v2 result
+## Preliminary benchmark-v3 result
 
 The cloud-only benchmark contains 50 anonymous users and 49.23 hours of
 processed motion. The fixed split is 40/5/5 users. On 20,000 windows from five
-held-out users at a 200 ms horizon:
+held-out users at a 200 ms horizon, the compact encoder comparison is:
 
 | Method | Mean | p95 | User-macro mean |
 | --- | ---: | ---: | ---: |
 | Constant pose | 3.666° | 9.096° | 3.647° |
-| Bounded residual-gated TCN | **3.188°** | **7.635°** | **3.173°** |
+| Residual-gated MLP | 3.198° | 7.679° | 3.183° |
+| Residual-gated TCN | 3.188° | 7.656° | 3.173° |
+| Residual-gated GRU | **3.162°** | **7.555°** | **3.148°** |
 
-The paired user-level improvement is -0.474° with a 95% clustered-bootstrap
-interval of [-0.669°, -0.305°]. The candidate correction is capped at 25°,
-which removes the residual/gate scale ambiguity observed in v1. Final-step
-uncertainty ranks risk (Spearman-style rank correlation 0.506): retaining the
-50% least-uncertain predictions reduces mean error from 3.188° to 2.248°.
-Its absolute scale is not yet calibrated. This is preliminary because the test
-cohort has only five users. See
-[the aggregate result](results/benchmark-v2.json) and
-[the protocol audit](docs/protocol_audit.md).
+The GRU's paired user-level improvement is -0.499° with a 95% clustered
+bootstrap interval of [-0.693°, -0.320°]. In high-motion windows its mean gain
+over constant pose is 1.235°. Learned uncertainty ranks error better than
+angular speed, while validation-only variance scaling reduces mean absolute
+coverage error to 0.028. FP32 ONNX inference reaches 0.112 ms median and
+0.208 ms p99 on the measured cloud CPU; dynamic INT8 is smaller but slower.
+This remains preliminary because the test cohort has only five users. See the
+[aggregate result](results/benchmark-v3.json), [technical report](docs/final_report.md)
+and [protocol audit](docs/protocol_audit.md).
 
 ## Current reproducible checks
 

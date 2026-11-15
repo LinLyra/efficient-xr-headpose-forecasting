@@ -104,7 +104,9 @@ def evaluate(
             features = torch.from_numpy(normalized[start : start + batch_size]).to(device)
             residual, log_variance, gate = model(features)
             predictions.append(gated_prediction(residual, gate).cpu().numpy())
-            variances.append(log_variance.exp().cpu().numpy())
+            variances.append(
+                log_variance.clamp(min=-8.0, max=6.0).exp().cpu().numpy()
+            )
             gates.append(gate.squeeze(-1).cpu().numpy())
     prediction = np.concatenate(predictions)
     variance = np.concatenate(variances)
@@ -206,7 +208,9 @@ def fit_validation_variance_scale(
             features = torch.from_numpy(normalized[start : start + batch_size]).to(device)
             residual, log_variance, gate = model(features)
             predictions.append(gated_prediction(residual, gate)[:, -1].cpu().numpy())
-            variances.append(log_variance.exp()[:, -1].cpu().numpy())
+            variances.append(
+                log_variance.clamp(min=-8.0, max=6.0).exp()[:, -1].cpu().numpy()
+            )
     prediction = np.concatenate(predictions)
     predicted_variance = np.concatenate(variances)
     residual_error = prediction - dataset.targets[:, -1]
