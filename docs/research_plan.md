@@ -2,10 +2,12 @@
 
 ## Scope
 
-This is a portfolio-grade, publication-disciplined study rather than a claim of
-laboratory-scale foundation-model training. The central hypothesis is that a
+This is a publication-directed study of selective learned intervention rather
+than a claim of foundation-model training. The central hypothesis is that a
 small learned residual should intervene mainly during non-stationary motion,
 while a calibrated physical predictor should remain the default elsewhere.
+The expanded benchmark follows the pre-committed protocol in
+[`frozen_evaluation_protocol.md`](frozen_evaluation_protocol.md).
 
 ## Stage gates
 
@@ -26,8 +28,11 @@ while a calibrated physical predictor should remain the default elsewhere.
 - Persistent processed data: target 20–50 GB, never raw multi-terabyte storage.
 - Pilot raw download: 20–50 GB to ephemeral cloud storage.
 - Expansion requires a documented learning-curve or coverage justification.
-- Single-GPU training; target total GPU use 100–200 hours.
-- Stop-work review at US$100 and hard budget review before US$200.
+- Single-GPU training. Compute is estimated from a CPU-only dry run before a
+  Pod is started, and every cloud batch has an explicit completion marker and
+  teardown check.
+- Stop-work review at US$50 and explicit approval before any additional US$50
+  block. Idle GPU time is not an acceptable experimental cost.
 
 ## First learned model
 

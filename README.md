@@ -76,7 +76,8 @@ angular speed, while validation-only variance scaling reduces mean absolute
 coverage error to 0.028. FP32 ONNX inference reaches 0.112 ms median and
 0.208 ms p99 on the measured cloud CPU; dynamic INT8 is smaller but slower.
 This remains preliminary because the test cohort has only five users. See the
-[aggregate result](results/benchmark-v3.json), [technical report](docs/final_report.md)
+[aggregate result](results/benchmark-v3.json), [technical report](docs/final_report.md),
+the [frozen expanded-benchmark protocol](docs/frozen_evaluation_protocol.md),
 and [protocol audit](docs/protocol_audit.md).
 
 ## Current reproducible checks
