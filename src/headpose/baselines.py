@@ -141,3 +141,73 @@ def linear_velocity_trend(
         forecasts.append(current)
     return np.stack(forecasts)
 
+
+def so3_error_state_kalman(
+    context: np.ndarray,
+    horizon: int = 20,
+    *,
+    dt: float = 0.01,
+    orientation_process_noise: float = 1e-4,
+    angular_acceleration_noise: float = 0.5,
+    measurement_noise: float = 2e-3,
+) -> np.ndarray:
+    """Forecast with a causal SO(3) error-state constant-velocity filter.
+
+    The nominal state is orientation and body-frame angular velocity. The
+    six-dimensional covariance covers their local errors. Quaternion
+    measurements update the nominal orientation through a tangent-space
+    innovation; no future measurement is used during forecasting.
+    """
+    values = _validate_context(context)
+    if horizon < 1 or dt <= 0.0:
+        raise ValueError("horizon and dt must be positive")
+    noises = (
+        orientation_process_noise,
+        angular_acceleration_noise,
+        measurement_noise,
+    )
+    if any(value <= 0.0 for value in noises):
+        raise ValueError("Kalman noise parameters must be positive")
+
+    orientation = values[0]
+    velocity = log_map(multiply(inverse(values[0]), values[1])) / dt
+    covariance = np.eye(6, dtype=float) * measurement_noise**2
+    transition = np.eye(6, dtype=float)
+    transition[:3, 3:] = np.eye(3) * dt
+    measurement = np.zeros((3, 6), dtype=float)
+    measurement[:, :3] = np.eye(3)
+    measurement_covariance = np.eye(3) * measurement_noise**2
+    process_covariance = np.zeros((6, 6), dtype=float)
+    process_covariance[:3, :3] = (
+        np.eye(3) * orientation_process_noise**2 * dt
+    )
+    process_covariance[3:, 3:] = (
+        np.eye(3) * angular_acceleration_noise**2 * dt
+    )
+    identity = np.eye(6, dtype=float)
+
+    for observed in values[1:]:
+        orientation = normalize(multiply(orientation, exp_map(velocity * dt)))
+        covariance = transition @ covariance @ transition.T + process_covariance
+        innovation = log_map(multiply(inverse(orientation), observed))
+        innovation_covariance = (
+            measurement @ covariance @ measurement.T + measurement_covariance
+        )
+        gain = np.linalg.solve(
+            innovation_covariance, measurement @ covariance
+        ).T
+        correction = gain @ innovation
+        orientation = normalize(multiply(orientation, exp_map(correction[:3])))
+        velocity = velocity + correction[3:]
+        residual = identity - gain @ measurement
+        covariance = (
+            residual @ covariance @ residual.T
+            + gain @ measurement_covariance @ gain.T
+        )
+
+    forecasts: list[np.ndarray] = []
+    for _ in range(horizon):
+        orientation = normalize(multiply(orientation, exp_map(velocity * dt)))
+        forecasts.append(orientation)
+    return np.stack(forecasts)
+

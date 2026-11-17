@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 from dataclasses import dataclass
+from collections.abc import Mapping
 from typing import Iterable
 
 
@@ -78,6 +79,42 @@ def partition_user_hashes(
         if index < train_count:
             split = "train"
         elif index < train_count + validation_count:
+            split = "validation"
+        else:
+            split = "test"
+        assignments[user] = split
+    return assignments
+
+
+def partition_user_hashes_exact(
+    user_hashes: Iterable[str],
+    seed: str,
+    counts: Mapping[str, int],
+) -> dict[str, str]:
+    """Return a deterministic keyed partition with exact named split counts."""
+    users = sorted(set(user_hashes))
+    required = {"train", "validation", "test"}
+    if set(counts) != required:
+        raise ValueError("counts must contain train, validation and test")
+    if any(int(value) < 1 for value in counts.values()):
+        raise ValueError("every split count must be positive")
+    if sum(int(value) for value in counts.values()) != len(users):
+        raise ValueError("split counts must equal the number of unique users")
+    if not seed:
+        raise ValueError("seed must be non-empty")
+    ordered = sorted(
+        users,
+        key=lambda user: hmac.new(
+            seed.encode(), user.encode(), hashlib.sha256
+        ).digest(),
+    )
+    train_stop = int(counts["train"])
+    validation_stop = train_stop + int(counts["validation"])
+    assignments: dict[str, str] = {}
+    for index, user in enumerate(ordered):
+        if index < train_stop:
+            split = "train"
+        elif index < validation_stop:
             split = "validation"
         else:
             split = "test"

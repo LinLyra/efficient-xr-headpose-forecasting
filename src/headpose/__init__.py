@@ -4,6 +4,7 @@ from .baselines import (
     constant_pose,
     constant_velocity,
     linear_velocity_trend,
+    so3_error_state_kalman,
     smoothed_velocity,
     windowed_velocity,
 )
@@ -15,6 +16,7 @@ __all__ = [
     "constant_pose",
     "constant_velocity",
     "linear_velocity_trend",
+    "so3_error_state_kalman",
     "smoothed_velocity",
     "windowed_velocity",
     "extract_head_trajectory",

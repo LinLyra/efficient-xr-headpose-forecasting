@@ -98,6 +98,23 @@ python scripts/train_boxrr_gate.py /cloud/path/boxrr-benchmark-v1 \
   --max-correction-degrees 25
 ~~~
 
+The expanded physical benchmark is deliberately split into two commands. The
+first sees training and validation windows only and writes a frozen selection;
+the second verifies that selection and evaluates the paired test windows once:
+
+~~~bash
+python scripts/run_expanded_baselines.py tune /cloud/path/boxrr-expanded \
+  --output /cloud/path/expanded-baselines
+python scripts/run_expanded_baselines.py test /cloud/path/boxrr-expanded \
+  --output /cloud/path/expanded-baselines \
+  --selection /cloud/path/expanded-baselines/frozen-selection.json
+~~~
+
+The test command rejects changed cohort sizes, window limits, protocol fields
+or validation fingerprints, and will not overwrite an existing test report
+unless explicitly instructed. See the
+[frozen protocol](docs/frozen_evaluation_protocol.md) before running it.
+
 The synthetic benchmark is not evidence of real-world accuracy. It is a
 deterministic validation of quaternion geometry, baseline behavior and the
 evaluation path before any governed dataset is accessed.

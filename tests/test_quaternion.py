@@ -8,6 +8,7 @@ from headpose.baselines import (
     damped_velocity,
     linear_velocity_trend,
     smoothed_velocity,
+    so3_error_state_kalman,
     windowed_velocity,
 )
 from headpose.quaternion import (
@@ -82,4 +83,22 @@ def test_robust_velocity_baselines_have_expected_shape() -> None:
     assert smoothed_velocity(context, 20).shape == (20, 4)
     assert windowed_velocity(context, 20).shape == (20, 4)
     assert linear_velocity_trend(context, 20).shape == (20, 4)
+
+
+def test_error_state_kalman_tracks_constant_rotation() -> None:
+    increments = np.arange(30, dtype=float)[:, None] * np.array([[0.0, 0.0, 0.01]])
+    poses = exp_map(increments)
+    forecast = so3_error_state_kalman(
+        poses[:20],
+        horizon=10,
+        measurement_noise=1e-4,
+        angular_acceleration_noise=1e-3,
+    )
+    assert geodesic_degrees(forecast[-1], poses[29]) < 0.1
+
+
+def test_error_state_kalman_validates_noise() -> None:
+    context = np.tile(np.array([1.0, 0.0, 0.0, 0.0]), (4, 1))
+    with pytest.raises(ValueError, match="noise"):
+        so3_error_state_kalman(context, measurement_noise=0.0)
 

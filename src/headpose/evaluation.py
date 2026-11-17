@@ -28,6 +28,15 @@ class ConfidenceInterval:
     clusters: int
 
 
+@dataclass(frozen=True)
+class PermutationTest:
+    estimate: float
+    null_difference: float
+    p_value: float
+    alternative: str
+    clusters: int
+
+
 def summarize_errors(errors: np.ndarray) -> ErrorSummary:
     values = np.asarray(errors, dtype=float).reshape(-1)
     values = values[np.isfinite(values)]
@@ -120,3 +129,61 @@ def paired_clustered_bootstrap_difference(
     if candidate.shape != reference.shape:
         raise ValueError("paired error arrays must have identical shapes")
     return clustered_bootstrap_mean(candidate - reference, cluster_ids, **kwargs)
+
+
+def paired_cluster_permutation_test(
+    candidate_errors: np.ndarray,
+    reference_errors: np.ndarray,
+    cluster_ids: np.ndarray,
+    *,
+    alternative: str = "two-sided",
+    null_difference: float = 0.0,
+    resamples: int = 10_000,
+    seed: int = 2027,
+) -> PermutationTest:
+    """Paired sign-flip test over user-level candidate-reference differences."""
+    candidate = np.asarray(candidate_errors, dtype=float).reshape(-1)
+    reference = np.asarray(reference_errors, dtype=float).reshape(-1)
+    clusters = np.asarray(cluster_ids).reshape(-1)
+    if candidate.shape != reference.shape or len(candidate) != len(clusters):
+        raise ValueError("paired errors and cluster_ids must be aligned")
+    if len(candidate) == 0 or resamples < 100:
+        raise ValueError("non-empty errors and at least 100 resamples required")
+    if alternative not in {"two-sided", "less", "greater"}:
+        raise ValueError("invalid alternative")
+    unique = np.unique(clusters)
+    differences = np.array(
+        [np.mean(candidate[clusters == item] - reference[clusters == item]) for item in unique]
+    )
+    centered = differences - null_difference
+    observed = float(np.mean(centered))
+    generator = np.random.default_rng(seed)
+    signs = generator.choice((-1.0, 1.0), size=(resamples, len(unique)))
+    null_statistics = np.mean(signs * centered, axis=1)
+    if alternative == "less":
+        extreme = null_statistics <= observed
+    elif alternative == "greater":
+        extreme = null_statistics >= observed
+    else:
+        extreme = np.abs(null_statistics) >= abs(observed)
+    return PermutationTest(
+        estimate=float(np.mean(differences)),
+        null_difference=float(null_difference),
+        p_value=float((np.count_nonzero(extreme) + 1) / (resamples + 1)),
+        alternative=alternative,
+        clusters=len(unique),
+    )
+
+
+def holm_adjust(p_values: np.ndarray) -> np.ndarray:
+    """Return Holm family-wise-error adjusted p-values in original order."""
+    values = np.asarray(p_values, dtype=float)
+    if values.ndim != 1 or len(values) == 0 or np.any((values < 0.0) | (values > 1.0)):
+        raise ValueError("p_values must be a non-empty vector in [0, 1]")
+    order = np.argsort(values)
+    ranked = values[order]
+    scaled = (len(values) - np.arange(len(values))) * ranked
+    adjusted_ranked = np.minimum(1.0, np.maximum.accumulate(scaled))
+    adjusted = np.empty_like(adjusted_ranked)
+    adjusted[order] = adjusted_ranked
+    return adjusted
